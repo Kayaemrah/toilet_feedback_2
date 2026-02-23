@@ -12,9 +12,12 @@
             background: #f8f8f8;
             padding: 20px;
             border-radius: 10px;
-            width: 250px;
-            font-size: 20px;
-            margin-bottom: 30px;
+            width: 300px;
+            font-size: 18px;
+            margin-bottom: 20px;
+        }
+        .filter-box {
+            margin-bottom: 20px;
         }
     </style>
 </head>
@@ -22,13 +25,26 @@
 
 <h2>Admin Panel</h2>
 
-<div class="card">
-    Ortalama Puan: <b>{{ avg }}</b>
+<!-- Filtre -->
+<div class="filter-box">
+    <form method="get">
+        <input type="hidden" name="key" value="{{ request.args.get('key') }}">
+        <input type="text" name="toilet" placeholder="WC No"
+               value="{{ selected_toilet or '' }}">
+        <button type="submit">Filtrele</button>
+    </form>
 </div>
 
-<h3>WC Bazlı Günlük Ortalama Grafik</h3>
-<canvas id="ratingChart"></canvas>
+<!-- Ortalama -->
+<div class="card">
+    <strong>Ortalama Puan:</strong> {{ average }}
+</div>
 
+<!-- Grafik -->
+<h3>Puan Dağılımı</h3>
+<canvas id="ratingChart" height="100"></canvas>
+
+<!-- Tablo -->
 <h3>Tüm Kayıtlar</h3>
 
 <table>
@@ -62,29 +78,24 @@
 </table>
 
 <script>
-    const chartData = {{ chart_data | safe }};
-    const dates = {{ dates | safe }};
-
-    const datasets = Object.keys(chartData).map(toilet => ({
-        label: "WC " + toilet,
-        data: dates.map(date => {
-            const entry = chartData[toilet].find(d => d.day === date);
-            return entry ? entry.avg : null;
-        }),
-        borderWidth: 2,
-        fill: false
-    }));
+    const ratingCounts = {{ rating_counts | tojson }};
 
     new Chart(document.getElementById("ratingChart"), {
-        type: "line",
+        type: "bar",
         data: {
-            labels: dates,
-            datasets: datasets
+            labels: ['1','2','3','4','5'],
+            datasets: [{
+                label: "Puan Sayısı",
+                data: ratingCounts,
+                borderWidth: 1
+            }]
         },
         options: {
             responsive: true,
             scales: {
-                y: { min: 0, max: 5 }
+                y: {
+                    beginAtZero: true
+                }
             }
         }
     });
