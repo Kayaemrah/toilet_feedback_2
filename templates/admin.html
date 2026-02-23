@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Panel</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: Arial; margin: 40px; }
+        table { border-collapse: collapse; width: 100%; margin-top: 30px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+        th { background-color: #f4f4f4; }
+        .card {
+            background: #f8f8f8;
+            padding: 20px;
+            border-radius: 10px;
+            width: 250px;
+            font-size: 20px;
+            margin-bottom: 30px;
+        }
+    </style>
+</head>
+<body>
+
+<h2>Admin Panel</h2>
+
+<div class="card">
+    Ortalama Puan: <b>{{ avg }}</b>
+</div>
+
+<h3>WC Bazlı Günlük Ortalama Grafik</h3>
+<canvas id="ratingChart"></canvas>
+
+<h3>Tüm Kayıtlar</h3>
+
+<table>
+    <tr>
+        <th>ID</th>
+        <th>WC</th>
+        <th>Puan</th>
+        <th>Koku</th>
+        <th>Malzeme</th>
+        <th>Ad</th>
+        <th>Soyad</th>
+        <th>İletişim</th>
+        <th>IP</th>
+        <th>Tarih</th>
+    </tr>
+
+    {% for row in rows %}
+    <tr>
+        <td>{{ row[0] }}</td>
+        <td>{{ row[1] }}</td>
+        <td>{{ row[2] }}</td>
+        <td>{{ row[3] }}</td>
+        <td>{{ row[4] }}</td>
+        <td>{{ row[5] }}</td>
+        <td>{{ row[6] }}</td>
+        <td>{{ row[7] }}</td>
+        <td>{{ row[8] }}</td>
+        <td>{{ row[9] }}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+<script>
+    const chartData = {{ chart_data | safe }};
+    const dates = {{ dates | safe }};
+
+    const datasets = Object.keys(chartData).map(toilet => ({
+        label: "WC " + toilet,
+        data: dates.map(date => {
+            const entry = chartData[toilet].find(d => d.day === date);
+            return entry ? entry.avg : null;
+        }),
+        borderWidth: 2,
+        fill: false
+    }));
+
+    new Chart(document.getElementById("ratingChart"), {
+        type: "line",
+        data: {
+            labels: dates,
+            datasets: datasets
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: { min: 0, max: 5 }
+            }
+        }
+    });
+</script>
+
+</body>
+</html>

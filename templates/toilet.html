@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Temizlik Değerlendirme - WC {{ toilet_id }}</title>
+    <style>
+        body {font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #f4f6f9; padding:20px; margin:0;}
+        .card {background:white; padding:20px; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.08); max-width:500px; margin:auto;}
+        h2{text-align:center; margin-bottom:20px;}
+        label{font-weight:600; display:block; margin-top:15px;}
+        input, select{width:100%; padding:14px; margin-top:8px; border-radius:8px; border:1px solid #ddd; font-size:16px;}
+        button{width:100%; padding:16px; margin-top:25px; background-color:#2c7be5; color:white; border:none; border-radius:8px; font-size:16px; font-weight:600;}
+        button:active{opacity:0.85;}
+        .footer{text-align:center; font-size:13px; margin-top:15px; color:#888;}
+    </style>
+</head>
+<body>
+<div class="card">
+    <h2>Temizlik Değerlendirme - WC {{ toilet_id }}</h2>
+    <form method="post">
+        <label>İsim</label>
+        <input type="text" name="first_name" required>
+
+        <label>Soyisim</label>
+        <input type="text" name="last_name" required>
+
+        <label>İletişim (Mail veya Telefon)</label>
+        <input type="text" name="contact" required>
+
+        <label>Puan (1 - 5)</label>
+        <input type="number" name="rating" min="1" max="5" required>
+
+        <label>Koku var mı?</label>
+        <select name="smell">
+            <option value="Evet">Evet</option>
+            <option value="Hayır" selected>Hayır</option>
+        </select>
+
+        <label>Sarf eksik mi?(Peçete,sabun vs.)</label>
+        <select name="supplies">
+            <option value="Evet">Evet</option>
+            <option value="Hayır" selected>Hayır</option>
+        </select>
+
+        <label>CAPTCHA: {{ captcha_a }} + {{ captcha_b }} = ?</label>
+        <input type="number" name="captcha" required>
+        <input type="hidden" name="expected_captcha" value="{{ captcha_answer }}">
+
+        <button type="submit">Gönder</button>
+    </form>
+    <div class="footer">Geri bildiriminiz bizim için değerlidir.</div>
+</div>
+</body>
+</html>
