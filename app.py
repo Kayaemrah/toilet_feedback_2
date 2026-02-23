@@ -198,39 +198,63 @@ def admin():
     if request.args.get("key") != os.environ.get("ADMIN_KEY"):
         return "Unauthorized", 401
 
-    toilet_filter = request.args.get("toilet")
-
     conn = sqlite3.connect(DB_FILE)
     c = conn.cursor()
 
-    # Filtreli veya filtresiz veri çek
-    if toilet_filter:
-        c.execute("""
-            SELECT id,toilet_id,rating,smell,supplies,
-                   first_name,last_name,contact,ip_address,timestamp
-            FROM feedback
-            WHERE toilet_id = ?
-            ORDER BY id DESC
-        """, (toilet_filter,))
-    else:
-        c.execute("""
-            SELECT id,toilet_id,rating,smell,supplies,
-                   first_name,last_name,contact,ip_address,timestamp
-            FROM feedback
-            ORDER BY id DESC
-        """)
-
+    # TÜM VERİLER
+    c.execute("""
+        SELECT id,toilet_id,rating,smell,supplies,
+               first_name,last_name,contact,ip_address,timestamp
+        FROM feedback
+        ORDER BY id DESC
+    """)
     rows = c.fetchall()
 
-    # Ortalama hesapla
+    # Ortalama
     ratings = [r[2] for r in rows]
     average = round(sum(ratings) / len(ratings), 2) if ratings else 0
 
-    # Grafik dağılımı (1-5 puan)
+    # Puan dağılımı
     rating_counts = [0, 0, 0, 0, 0]
     for r in ratings:
         if 1 <= r <= 5:
             rating_counts[r - 1] += 1
+
+    # GRAFİK VERİSİ (Her WC ayrı)
+    c.execute("""
+        SELECT toilet_id,
+               DATE(timestamp),
+               AVG(rating)
+        FROM feedback
+        GROUP BY toilet_id, DATE(timestamp)
+        ORDER BY DATE(timestamp)
+    """)
+    raw_chart = c.fetchall()
+
+    chart_data = {}
+    dates = set()
+
+    for toilet_id, day, avg_rating in raw_chart:
+        dates.add(day)
+        if toilet_id not in chart_data:
+            chart_data[toilet_id] = []
+        chart_data[toilet_id].append({
+            "day": day,
+            "avg": round(avg_rating, 2)
+        })
+
+    dates = sorted(list(dates))
+
+    conn.close()
+
+    return render_template(
+        "admin.html",
+        rows=rows,
+        average=average,
+        rating_counts=rating_counts,
+        chart_data=json.dumps(chart_data),
+        dates=json.dumps(dates)
+    )
 
     # ---------------- GRAFİK VERİSİ ----------------
     c.execute("""
