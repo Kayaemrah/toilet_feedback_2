@@ -226,6 +226,12 @@ def admin():
     ratings = [r[2] for r in rows]
     average = round(sum(ratings) / len(ratings), 2) if ratings else 0
 
+    # Grafik dağılımı (1-5 puan)
+    rating_counts = [0, 0, 0, 0, 0]
+    for r in ratings:
+        if 1 <= r <= 5:
+            rating_counts[r - 1] += 1
+
     # ---------------- GRAFİK VERİSİ ----------------
     c.execute("""
         SELECT toilet_id,
@@ -258,7 +264,8 @@ def admin():
         "admin.html",
         rows=rows,
         average=average,
-        avg=average,   # html'deki kart için
+        avg=average,
+        rating_counts=rating_counts,  # ← BUNU EKLEDİK
         chart_data=json.dumps(chart_data),
         dates=json.dumps(dates),
         selected_toilet=toilet_filter

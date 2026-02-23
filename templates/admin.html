@@ -78,7 +78,7 @@
 </table>
 
 <script>
-    const ratingCounts = {{ rating_counts | tojson }};
+    const ratingCounts = {{ rating_counts | default([0,0,0,0,0]) | tojson }};
 
     new Chart(document.getElementById("ratingChart"), {
         type: "bar",
